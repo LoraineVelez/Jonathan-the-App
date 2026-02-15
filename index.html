@@ -65,13 +65,20 @@
       .card-back {
         transform: rotateY(0deg);
       }
-      @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+      
+      /* Strictly vertical float animation - no rotation or horizontal movement */
+      @keyframes vertical-float {
+        0%, 100% { 
+          transform: translateY(0); 
+        }
+        50% { 
+          transform: translateY(-30px); 
+        }
       }
-      .animate-float {
-        animation: float 3s ease-in-out infinite;
+      .animate-vertical-float {
+        animation: vertical-float 4s ease-in-out infinite;
       }
+
       @keyframes spin-slow {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
@@ -168,12 +175,12 @@
   <script type="importmap">
 {
   "imports": {
-    "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4"
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
   }
 }
 </script>

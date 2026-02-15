@@ -32,7 +32,7 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
         setCard(res);
         setLoading(false);
         setTimeout(() => setIsFlipped(true), 100);
-      }, 1500);
+      }, 2500); 
     } catch (e: any) {
       console.error(e);
       setLoading(false);
@@ -91,7 +91,7 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
 
         {(loading || card) && (
           <div className="flex-1 flex flex-col items-center w-full max-w-4xl mx-auto py-8">
-            <div className={`w-64 h-96 card-flip mb-12 ${loading ? 'animate-float' : ''}`}>
+            <div className={`w-64 h-96 card-flip mb-12 transition-transform duration-1000 ${loading ? 'animate-vertical-float scale-110' : ''}`}>
                <div className={`card-inner glow-mystic ${isFlipped ? 'is-flipped' : ''} ${card?.isReversed ? 'rotate-180' : ''}`}>
                  <div className="card-back bg-black border border-purple-900/40">
                     <img 
