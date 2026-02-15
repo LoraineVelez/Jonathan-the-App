@@ -3,20 +3,24 @@ import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../t
 
 /**
  * Lazily initialize the Gemini client.
+ * Ensures the API key is a valid string before instantiation.
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
-  // Use mystical phrasing for errors to keep Jonathan in character.
+  
+  // We check for all possible 'empty' states that might come from the build env
   if (!apiKey || apiKey === "null" || apiKey === "undefined" || apiKey === "") {
     throw new Error("The stars are currently clouded.");
   }
+  
+  // Explicitly cast to string after the check to satisfy the compiler
   return new GoogleGenAI({ apiKey: apiKey as string });
 };
 
 /**
  * Helper to clean JSON strings from the model.
  */
-const cleanJsonResponse = (text: string) => {
+const cleanJsonResponse = (text: string): string => {
   return text.replace(/```json\n?|```/g, "").trim();
 };
 
@@ -65,7 +69,7 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
     });
 
     const text = response.text;
-    if (!text) {
+    if (typeof text !== 'string') {
       throw new Error("Jonathan is deep in thought.");
     }
 
@@ -105,7 +109,7 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
     });
 
     const text = response.text;
-    if (!text) {
+    if (typeof text !== 'string') {
       throw new Error("The stars are silent.");
     }
 
@@ -154,7 +158,7 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
     });
 
     const text = response.text;
-    if (!text) {
+    if (typeof text !== 'string') {
       throw new Error("The subconscious veil is too thick.");
     }
 
@@ -187,7 +191,7 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
     });
 
     const text = response.text;
-    if (!text) {
+    if (typeof text !== 'string') {
       throw new Error("The transit charts are obscured.");
     }
 
