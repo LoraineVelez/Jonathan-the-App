@@ -2,7 +2,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Explicitly guard the API key to satisfy TypeScript narrowing requirements.
+// The build process (Vite) will inject this via process.env.API_KEY.
+const apiKey = process.env.API_KEY;
+if (!apiKey) {
+  throw new Error("Missing API_KEY environment variable. Please ensure it is set in your build environment.");
+}
+
+const ai = new GoogleGenAI({ apiKey });
 
 /**
  * Helper to retry API calls with exponential backoff when hitting rate limits (429).
@@ -47,7 +54,10 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
       }
     });
 
-    const data = JSON.parse(response.text);
+    const text = response.text;
+    if (!text) throw new Error("Jonathan is silent. No response text received.");
+
+    const data = JSON.parse(text);
     return {
       directive,
       timeAnchor,
@@ -78,7 +88,10 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
       }
     });
 
-    const data = JSON.parse(response.text);
+    const text = response.text;
+    if (!text) throw new Error("Jonathan is silent. No response text received.");
+
+    const data = JSON.parse(text);
     return {
       name: cardName,
       isReversed,
@@ -120,7 +133,10 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
       }
     });
 
-    return JSON.parse(response.text);
+    const text = response.text;
+    if (!text) throw new Error("Jonathan is silent. No response text received.");
+
+    return JSON.parse(text);
   });
 };
 
@@ -146,7 +162,10 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
       }
     });
 
-    const data = JSON.parse(response.text);
+    const text = response.text;
+    if (!text) throw new Error("Jonathan is silent. No response text received.");
+
+    const data = JSON.parse(text);
     return {
       name: sign,
       date: today,
