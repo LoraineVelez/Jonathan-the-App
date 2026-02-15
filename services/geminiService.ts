@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../types";
 
@@ -7,11 +6,11 @@ import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../t
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
-  // If key is missing or invalid, we throw a silent error that views will handle mystically
+  // Use mystical phrasing for errors to keep Jonathan in character.
   if (!apiKey || apiKey === "null" || apiKey === "undefined" || apiKey === "") {
     throw new Error("The stars are currently clouded.");
   }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: apiKey as string });
 };
 
 /**
@@ -65,7 +64,12 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
       }
     });
 
-    const data = JSON.parse(cleanJsonResponse(response.text));
+    const text = response.text;
+    if (!text) {
+      throw new Error("Jonathan is deep in thought.");
+    }
+
+    const data = JSON.parse(cleanJsonResponse(text));
     return {
       directive,
       timeAnchor,
@@ -100,7 +104,12 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
       }
     });
 
-    const data = JSON.parse(cleanJsonResponse(response.text));
+    const text = response.text;
+    if (!text) {
+      throw new Error("The stars are silent.");
+    }
+
+    const data = JSON.parse(cleanJsonResponse(text));
     return {
       name: cardName,
       isReversed,
@@ -144,7 +153,12 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
       }
     });
 
-    return JSON.parse(cleanJsonResponse(response.text));
+    const text = response.text;
+    if (!text) {
+      throw new Error("The subconscious veil is too thick.");
+    }
+
+    return JSON.parse(cleanJsonResponse(text));
   });
 };
 
@@ -172,7 +186,12 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
       }
     });
 
-    const data = JSON.parse(cleanJsonResponse(response.text));
+    const text = response.text;
+    if (!text) {
+      throw new Error("The transit charts are obscured.");
+    }
+
+    const data = JSON.parse(cleanJsonResponse(text));
     return {
       name: sign,
       date: today,
