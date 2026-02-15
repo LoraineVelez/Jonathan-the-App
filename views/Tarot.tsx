@@ -14,34 +14,40 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
   const [loading, setLoading] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [card, setCard] = useState<TarotCard | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const pullCard = async () => {
     if (loading) return;
     setLoading(true);
     setCard(null);
     setIsFlipped(false);
+    setError(null);
     
     const randomName = TAROT_DECK[Math.floor(Math.random() * TAROT_DECK.length)];
     const isReversed = Math.random() > 0.7;
     
     try {
       const res = await generateTarotInterpretation(randomName, isReversed);
-      // Brief delay for mystical suspense
       setTimeout(() => {
         setCard(res);
         setLoading(false);
-        // Automatically flip after a tiny delay once data is in
         setTimeout(() => setIsFlipped(true), 100);
       }, 1500);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setLoading(false);
+      if (e?.message?.includes('429')) {
+        setError("Jonathan is overwhelmed by too many seekers. Please wait 60 seconds for the stars to realign.");
+      } else {
+        setError("The cards are clouded. Please try again.");
+      }
     }
   };
 
   const handleReset = () => {
     setCard(null);
     setIsFlipped(false);
+    setError(null);
   };
 
   return (
@@ -52,9 +58,16 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
         {!card && !loading && (
           <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in duration-1000">
             <h2 className="text-4xl font-mystical mb-4 text-purple-200">The Tarot</h2>
-            <p className="text-sm text-gray-400 mb-12 max-w-[300px] leading-relaxed font-light">
+            <p className="text-sm text-gray-400 mb-6 max-w-[300px] leading-relaxed font-light">
               Clear your mind. Silently ask your question to the universe before you pull.
             </p>
+
+            {error && (
+              <div className="mb-8 p-4 border border-red-900/30 bg-red-950/10 rounded-2xl max-w-xs">
+                <p className="text-xs text-red-400">{error}</p>
+              </div>
+            )}
+
             <button
               onClick={pullCard}
               className="group relative w-56 h-80 card-flip cursor-pointer focus:outline-none"
@@ -80,7 +93,6 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
           <div className="flex-1 flex flex-col items-center w-full max-w-4xl mx-auto py-8">
             <div className={`w-64 h-96 card-flip mb-12 ${loading ? 'animate-float' : ''}`}>
                <div className={`card-inner glow-mystic ${isFlipped ? 'is-flipped' : ''} ${card?.isReversed ? 'rotate-180' : ''}`}>
-                 {/* Back of Card (Pattern) */}
                  <div className="card-back bg-black border border-purple-900/40">
                     <img 
                       src={CARD_BACK_URL} 
@@ -94,7 +106,6 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
                     )}
                  </div>
                  
-                 {/* Front of Card (The Reveal) */}
                  <div className="card-front bg-neutral-950 border-2 border-purple-500/50 flex flex-col items-center justify-center p-6 text-center shadow-inner shadow-purple-900/20">
                     <div className="w-full h-full border border-purple-900/20 rounded-lg flex flex-col items-center justify-center space-y-4">
                        <span className="text-5xl text-purple-300">❂</span>

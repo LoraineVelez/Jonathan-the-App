@@ -11,17 +11,24 @@ const DreamAnalysis: React.FC<DreamAnalysisProps> = ({ onBack }) => {
   const [dream, setDream] = useState('');
   const [result, setResult] = useState<DreamAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dream.trim() || loading) return;
     
     setLoading(true);
+    setError(null);
     try {
       const res = await analyzeDream(dream);
       setResult(res);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      if (err?.message?.includes('429')) {
+        setError("The collective subconscious is currently crowded. Please wait 60 seconds before consulting Jonathan again.");
+      } else {
+        setError("Jonathan could not decipher this vision. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -54,6 +61,12 @@ const DreamAnalysis: React.FC<DreamAnalysisProps> = ({ onBack }) => {
                 </div>
               )}
             </div>
+
+            {error && (
+              <div className="p-6 border border-red-900/30 bg-red-950/10 rounded-3xl text-center">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
             
             <button
               type="submit"
@@ -101,7 +114,7 @@ const DreamAnalysis: React.FC<DreamAnalysisProps> = ({ onBack }) => {
 
           <div className="text-center pt-8">
             <button 
-              onClick={() => { setResult(null); setDream(''); }}
+              onClick={() => { setResult(null); setDream(''); setError(null); }}
               className="text-[10px] uppercase tracking-[0.3em] text-gray-600 hover:text-purple-400 border border-transparent hover:border-purple-900/30 px-8 py-4 rounded-full transition-all"
             >
               Analyze another dream

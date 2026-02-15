@@ -109,8 +109,9 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
 export const analyzeDream = async (dreamDescription: string): Promise<DreamAnalysisResult> => {
   const ai = getAI();
   return withRetry(async () => {
+    // Switching to gemini-3-flash-preview as it has higher quota limits than Pro on free tier
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3-flash-preview',
       contents: `Analyze this dream in a structured dictionary format: "${dreamDescription}".
       1. Identify key symbols and define them psychologically (no mysticism).
       2. Suggest what this indicates about the dreamer's stress/career/relationships.
