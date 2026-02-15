@@ -3,18 +3,18 @@ import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../t
 
 /**
  * Lazily initialize the Gemini client.
- * Ensures the API key is a valid string before instantiation.
+ * In Vite/Netlify, process.env.API_KEY is replaced at build time.
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
   
-  // We check for all possible 'empty' states that might come from the build env
-  if (!apiKey || apiKey === "null" || apiKey === "undefined" || apiKey === "") {
-    throw new Error("The stars are currently clouded.");
+  // Validate the API key is present and not a placeholder string
+  if (typeof apiKey !== 'string' || !apiKey || apiKey === "null" || apiKey === "undefined") {
+    // Jonathan's thematic error message
+    throw new Error("The stars are currently clouded. Your destiny is momentarily obscured.");
   }
   
-  // Explicitly cast to string after the check to satisfy the compiler
-  return new GoogleGenAI({ apiKey: apiKey as string });
+  return new GoogleGenAI({ apiKey });
 };
 
 /**
@@ -69,8 +69,8 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
     });
 
     const text = response.text;
-    if (typeof text !== 'string') {
-      throw new Error("Jonathan is deep in thought.");
+    if (typeof text !== 'string' || !text) {
+      throw new Error("Jonathan is deep in thought. The vision did not manifest.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
@@ -109,8 +109,8 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
     });
 
     const text = response.text;
-    if (typeof text !== 'string') {
-      throw new Error("The stars are silent.");
+    if (typeof text !== 'string' || !text) {
+      throw new Error("The stars are silent. Try to clear your mind and pull again.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
@@ -158,8 +158,8 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
     });
 
     const text = response.text;
-    if (typeof text !== 'string') {
-      throw new Error("The subconscious veil is too thick.");
+    if (typeof text !== 'string' || !text) {
+      throw new Error("The subconscious veil is too thick. Jonathan cannot see through it yet.");
     }
 
     return JSON.parse(cleanJsonResponse(text));
@@ -191,8 +191,8 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
     });
 
     const text = response.text;
-    if (typeof text !== 'string') {
-      throw new Error("The transit charts are obscured.");
+    if (typeof text !== 'string' || !text) {
+      throw new Error("The transit charts are obscured. The alignment is not yet ready.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
