@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DIRECTIVES, TIME_ANCHORS } from '../constants';
 import { generateFateReading } from '../services/geminiService';
@@ -18,7 +17,6 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    // Initial shuffle sequence
     const shuffleTimer = setTimeout(() => {
       setIsInitialShuffle(false);
     }, 2400);
@@ -40,7 +38,6 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
       const res = await generateFateReading(randomDirective, randomTime);
       setReading(res);
       
-      // Sequence the opening animation
       setTimeout(() => {
         setIsOpen(true);
         setTimeout(() => {
@@ -52,10 +49,12 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
     } catch (e: any) {
       console.error(e);
       setLoading(false);
-      if (e?.message?.includes('429')) {
-        setError("Jonathan is deep in thought and cannot be reached right now. Try again in a few moments.");
+      if (e?.message?.includes('API KEY MISSING')) {
+        setError(e.message);
+      } else if (e?.message?.includes('429')) {
+        setError("Jonathan is deep in thought and cannot be reached right now. Try again in 60 seconds.");
       } else {
-        setError("The connection to the beyond has faded. Please try again.");
+        setError("The connection to the beyond has faded: " + (e.message || "Unknown Error"));
       }
     }
   };
@@ -117,20 +116,18 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
           })}
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="mt-8 p-6 border border-red-900/30 bg-red-950/10 rounded-2xl max-w-sm text-center animate-in fade-in">
             <p className="text-sm text-red-400 mb-4">{error}</p>
             <button 
               onClick={resetFate}
-              className="text-[10px] uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+              className="text-[10px] uppercase tracking-widest text-white/60 hover:text-white transition-colors border border-white/20 px-4 py-2 rounded-full"
             >
               Try Selection Again
             </button>
           </div>
         )}
 
-        {/* Selected Envelope and Reveal Animation */}
         {selected !== null && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
             <div className={`w-64 sm:w-80 aspect-[4/3] relative transition-transform duration-1000 ${showPopup ? 'translate-y-24 scale-75 opacity-50' : 'scale-110'}`}>
@@ -150,7 +147,6 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
             {showPopup && reading && (
               <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 py-20 bg-black/80 backdrop-blur-sm animate-in fade-in duration-500 overflow-y-auto no-scrollbar">
                 <div className="max-w-xl w-full p-8 sm:p-12 border border-purple-900/50 bg-mystic-gradient rounded-[2.5rem] space-y-10 shadow-2xl animate-in slide-in-from-bottom-12 duration-700 relative">
-                  {/* Close button */}
                   <button 
                     onClick={closePopup}
                     className="absolute top-6 right-8 text-gray-500 hover:text-purple-400 transition-colors text-xl font-light"

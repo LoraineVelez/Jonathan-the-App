@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ZODIAC_SIGNS } from '../constants';
 import { generateHoroscope } from '../services/geminiService';
@@ -12,15 +11,22 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
   const [selectedSign, setSelectedSign] = useState<typeof ZODIAC_SIGNS[0] | null>(null);
   const [data, setData] = useState<HoroscopeData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchHoroscope = async (sign: typeof ZODIAC_SIGNS[0]) => {
     setSelectedSign(sign);
     setLoading(true);
+    setError(null);
     try {
       const res = await generateHoroscope(sign.name);
       setData({ ...res, icon: sign.icon });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      if (e?.message?.includes('API KEY MISSING')) {
+        setError(e.message);
+      } else {
+        setError("The stars are currently clouded. " + (e.message || "Please try again later."));
+      }
     } finally {
       setLoading(false);
     }
@@ -53,13 +59,23 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
         </div>
       )}
 
-      {(loading || data) && selectedSign && (
+      {(loading || data || error) && selectedSign && (
         <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom duration-1000 max-w-2xl mx-auto w-full">
           <div className="w-full bg-mystic-gradient border border-purple-900/30 p-10 rounded-[3rem] relative shadow-2xl shadow-purple-950/20">
             {loading ? (
               <div className="flex flex-col items-center py-24">
                 <div className="text-5xl animate-spin-slow mb-10 opacity-40">✦</div>
                 <p className="text-xs text-purple-400 animate-pulse tracking-[0.3em] uppercase">Consulting the transit charts...</p>
+              </div>
+            ) : error ? (
+              <div className="flex flex-col items-center py-12 text-center">
+                <p className="text-red-400 mb-8">{error}</p>
+                <button 
+                  onClick={() => { setSelectedSign(null); setError(null); }}
+                  className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border border-white/10 px-6 py-3 rounded-full"
+                >
+                  Return to Zodiac
+                </button>
               </div>
             ) : data && (
               <div className="space-y-8">

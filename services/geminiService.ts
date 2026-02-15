@@ -1,17 +1,23 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../types";
 
 /**
- * Lazily initialize the Gemini client to avoid top-level crashes 
- * during application mount if the API key is not yet available.
+ * Lazily initialize the Gemini client.
+ * Provides explicit instructions if the key is missing in production.
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("Jonathan is silent. (API Key not configured in environment)");
+  if (!apiKey || apiKey === "null" || apiKey === "undefined") {
+    throw new Error("API KEY MISSING: Please add a variable named 'API_KEY' in your Netlify Environment Settings and redeploy.");
   }
   return new GoogleGenAI({ apiKey });
+};
+
+/**
+ * Helper to clean JSON strings from the model, stripping markdown blocks if present.
+ */
+const cleanJsonResponse = (text: string) => {
+  return text.replace(/```json\n?|```/g, "").trim();
 };
 
 /**
@@ -35,23 +41,27 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
   return withRetry(async () => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Generate a fate reading for a user.
-      Directive: ${directive}
-      Time Anchor: ${timeAnchor}
-      Tone: Realistic, grounded, direct, not cruel, not dramatic, psychologically insightful.
-      Language: 8th grade English.
-      
-      CRITICAL: For the "sign", follow this exact structure:
-      "Observe This Signal: [common object or situation]. Look for: [where to realistically find it]. Meaning: [grounded interpretation about habits or choices]."
-      
-      Output: JSON only.`,
+      contents: {
+        parts: [{
+          text: `Generate a fate reading for a user.
+          Directive: ${directive}
+          Time Anchor: ${timeAnchor}
+          Tone: Realistic, grounded, direct, not cruel, not dramatic, psychologically insightful.
+          Language: 8th grade English.
+          
+          CRITICAL: For the "sign", follow this exact structure:
+          "Observe This Signal: [common object or situation]. Look for: [where to realistically find it]. Meaning: [grounded interpretation about habits or choices]."
+          
+          Output: JSON only.`
+        }]
+      },
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            fate: { type: Type.STRING, description: 'Realistic fate statement related to life, career, or love.' },
-            sign: { type: Type.STRING, description: 'Structured signal: Observe This Signal: ... Look for: ... Meaning: ...' }
+            fate: { type: Type.STRING },
+            sign: { type: Type.STRING }
           },
           required: ["fate", "sign"]
         }
@@ -59,9 +69,9 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
     });
 
     const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response text received.");
+    if (!text) throw new Error("Jonathan is silent. No response received.");
 
-    const data = JSON.parse(text);
+    const data = JSON.parse(cleanJsonResponse(text));
     return {
       directive,
       timeAnchor,
@@ -76,10 +86,14 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
   return withRetry(async () => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Analyze the Tarot card "${cardName}" ${isReversed ? '(Reversed)' : '(Upright)'}.
-      Include a "description" (traditional matter-of-fact definition) and "interpretation" (grounded, practical real life meaning in calm modern language).
-      Language: 8th grade English.
-      Output: JSON only.`,
+      contents: {
+        parts: [{
+          text: `Analyze the Tarot card "${cardName}" ${isReversed ? '(Reversed)' : '(Upright)'}.
+          Include a "description" (traditional matter-of-fact definition) and "interpretation" (grounded, practical real life meaning in calm modern language).
+          Language: 8th grade English.
+          Output: JSON only.`
+        }]
+      },
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -94,9 +108,9 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
     });
 
     const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response text received.");
+    if (!text) throw new Error("Jonathan is silent. No response received.");
 
-    const data = JSON.parse(text);
+    const data = JSON.parse(cleanJsonResponse(text));
     return {
       name: cardName,
       isReversed,
@@ -109,15 +123,18 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
 export const analyzeDream = async (dreamDescription: string): Promise<DreamAnalysisResult> => {
   const ai = getAI();
   return withRetry(async () => {
-    // Switching to gemini-3-flash-preview as it has higher quota limits than Pro on free tier
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Analyze this dream in a structured dictionary format: "${dreamDescription}".
-      1. Identify key symbols and define them psychologically (no mysticism).
-      2. Suggest what this indicates about the dreamer's stress/career/relationships.
-      3. Provide a practical "Jonathan Recommends" action step.
-      Language: 8th grade English.
-      Output: JSON only.`,
+      contents: {
+        parts: [{
+          text: `Analyze this dream in a structured dictionary format: "${dreamDescription}".
+          1. Identify key symbols and define them psychologically (no mysticism).
+          2. Suggest what this indicates about the dreamer's stress/career/relationships.
+          3. Provide a practical "Jonathan Recommends" action step.
+          Language: 8th grade English.
+          Output: JSON only.`
+        }]
+      },
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -130,20 +147,22 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
                 properties: {
                   name: { type: Type.STRING },
                   meaning: { type: Type.STRING }
-                }
+                },
+                required: ["name", "meaning"]
               }
             },
             suggestion: { type: Type.STRING },
             recommendation: { type: Type.STRING }
-          }
+          },
+          required: ["symbols", "suggestion", "recommendation"]
         }
       }
     });
 
     const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response text received.");
+    if (!text) throw new Error("Jonathan is silent. No response received.");
 
-    return JSON.parse(text);
+    return JSON.parse(cleanJsonResponse(text));
   });
 };
 
@@ -153,33 +172,38 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
   return withRetry(async () => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Write a horoscope for ${sign} for today (${today}).
-      Style: Co-Star style, matter-of-fact, based on current planetary transits.
-      Tone: Dry, analytical, modern.
-      Language: 8th grade English.
-      Output: JSON only.`,
+      contents: {
+        parts: [{
+          text: `Write a horoscope for ${sign} for today (${today}).
+          Style: Co-Star style, matter-of-fact, based on current planetary transits.
+          Tone: Dry, analytical, modern.
+          Language: 8th grade English.
+          Output: JSON only.`
+        }]
+      },
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            headline: { type: Type.STRING, description: 'One line summary headline.' },
-            prediction: { type: Type.STRING, description: 'One short paragraph.' }
-          }
+            headline: { type: Type.STRING },
+            prediction: { type: Type.STRING }
+          },
+          required: ["headline", "prediction"]
         }
       }
     });
 
     const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response text received.");
+    if (!text) throw new Error("Jonathan is silent. No response received.");
 
-    const data = JSON.parse(text);
+    const data = JSON.parse(cleanJsonResponse(text));
     return {
       name: sign,
       date: today,
       headline: data.headline,
       prediction: data.prediction,
-      icon: '' // to be filled from constants
+      icon: '' 
     };
   });
 };

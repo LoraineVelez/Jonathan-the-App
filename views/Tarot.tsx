@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { TAROT_DECK } from '../constants';
 import { generateTarotInterpretation } from '../services/geminiService';
@@ -36,10 +35,12 @@ const Tarot: React.FC<TarotProps> = ({ onBack }) => {
     } catch (e: any) {
       console.error(e);
       setLoading(false);
-      if (e?.message?.includes('429')) {
+      if (e?.message?.includes('API KEY MISSING')) {
+        setError(e.message);
+      } else if (e?.message?.includes('429')) {
         setError("Jonathan is overwhelmed by too many seekers. Please wait 60 seconds for the stars to realign.");
       } else {
-        setError("The cards are clouded. Please try again.");
+        setError("The cards are clouded: " + (e.message || "Unknown Connection Error"));
       }
     }
   };
