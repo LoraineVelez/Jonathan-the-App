@@ -2,14 +2,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../types";
 
-// Explicitly guard the API key to satisfy TypeScript narrowing requirements.
-// The build process (Vite) will inject this via process.env.API_KEY.
-const apiKey = process.env.API_KEY;
-if (!apiKey) {
-  throw new Error("Missing API_KEY environment variable. Please ensure it is set in your build environment.");
-}
-
-const ai = new GoogleGenAI({ apiKey });
+/**
+ * Lazily initialize the Gemini client to avoid top-level crashes 
+ * during application mount if the API key is not yet available.
+ */
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("Jonathan is silent. (API Key not configured in environment)");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 /**
  * Helper to retry API calls with exponential backoff when hitting rate limits (429).
@@ -28,6 +31,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Pr
 }
 
 export const generateFateReading = async (directive: string, timeAnchor: string): Promise<FateReading> => {
+  const ai = getAI();
   return withRetry(async () => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -68,6 +72,7 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
 };
 
 export const generateTarotInterpretation = async (cardName: string, isReversed: boolean): Promise<TarotCard> => {
+  const ai = getAI();
   return withRetry(async () => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -102,6 +107,7 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
 };
 
 export const analyzeDream = async (dreamDescription: string): Promise<DreamAnalysisResult> => {
+  const ai = getAI();
   return withRetry(async () => {
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
@@ -141,6 +147,7 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
 };
 
 export const generateHoroscope = async (sign: string): Promise<HoroscopeData> => {
+  const ai = getAI();
   const today = new Date().toLocaleDateString();
   return withRetry(async () => {
     const response = await ai.models.generateContent({
