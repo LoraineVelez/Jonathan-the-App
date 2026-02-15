@@ -3,18 +3,15 @@ import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../t
 
 /**
  * Lazily initialize the Gemini client.
- * In Vite/Netlify, process.env.API_KEY is replaced at build time.
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
   
-  // Validate the API key is present and not a placeholder string
-  if (typeof apiKey !== 'string' || !apiKey || apiKey === "null" || apiKey === "undefined") {
-    // Jonathan's thematic error message
-    throw new Error("The stars are currently clouded. Your destiny is momentarily obscured.");
+  if (!apiKey || apiKey === "null" || apiKey === "undefined" || apiKey === "") {
+    throw new Error("The stars are currently clouded.");
   }
   
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: apiKey as string });
 };
 
 /**
@@ -69,8 +66,8 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
     });
 
     const text = response.text;
-    if (typeof text !== 'string' || !text) {
-      throw new Error("Jonathan is deep in thought. The vision did not manifest.");
+    if (!text) {
+      throw new Error("Jonathan is deep in thought.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
@@ -109,8 +106,8 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
     });
 
     const text = response.text;
-    if (typeof text !== 'string' || !text) {
-      throw new Error("The stars are silent. Try to clear your mind and pull again.");
+    if (!text) {
+      throw new Error("The stars are silent.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
@@ -158,8 +155,8 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
     });
 
     const text = response.text;
-    if (typeof text !== 'string' || !text) {
-      throw new Error("The subconscious veil is too thick. Jonathan cannot see through it yet.");
+    if (!text) {
+      throw new Error("The subconscious veil is too thick.");
     }
 
     return JSON.parse(cleanJsonResponse(text));
@@ -191,8 +188,8 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
     });
 
     const text = response.text;
-    if (typeof text !== 'string' || !text) {
-      throw new Error("The transit charts are obscured. The alignment is not yet ready.");
+    if (!text) {
+      throw new Error("The transit charts are obscured.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));

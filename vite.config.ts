@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   define: {
-    // Standard approach to expose the injected Netlify API_KEY to the client-side code.
+    // This allows process.env.API_KEY to be used in the code.
+    // Vite will replace this with the value from the environment.
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY || null),
   },
   build: {
