@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { DIRECTIVES, TIME_ANCHORS } from '../constants';
 import { generateFateReading } from '../services/geminiService';
@@ -49,13 +50,7 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
     } catch (e: any) {
       console.error(e);
       setLoading(false);
-      if (e?.message?.includes('API KEY MISSING')) {
-        setError(e.message);
-      } else if (e?.message?.includes('429')) {
-        setError("Jonathan is deep in thought and cannot be reached right now. Try again in 60 seconds.");
-      } else {
-        setError("The connection to the beyond has faded: " + (e.message || "Unknown Error"));
-      }
+      setError("The connection to the beyond has faded. The stars are clouded tonight.");
     }
   };
 
@@ -88,42 +83,30 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
         </div>
         
         <div className={`grid grid-cols-2 sm:grid-cols-4 gap-12 w-full px-4 transition-all duration-1000 ${selected !== null ? 'opacity-0 pointer-events-none scale-90' : 'opacity-100'}`}>
-          {[0, 1, 2, 3].map((idx) => {
-            const shuffleClass = `animate-shuffle-${idx}`;
-            const floatClass = `animate-float`;
-            
-            return (
-              <div
-                key={idx}
-                onClick={() => handleSelect(idx)}
-                className={`aspect-[4/3] relative cursor-pointer group
-                  ${isInitialShuffle ? shuffleClass : floatClass}
-                `}
-                style={{ 
-                  animationDelay: !isInitialShuffle ? `${idx * 0.15}s` : '0s',
-                }}
-              >
-                <div className="envelope rounded-sm group-hover:border-purple-500 group-hover:shadow-[0_0_30px_rgba(147,51,234,0.3)] transition-all">
-                  <div className="envelope-flap"></div>
-                  <div className="envelope-body flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-purple-900/30 border border-purple-500/50 flex items-center justify-center">
-                       <span className="text-[10px] text-purple-300 opacity-50">❂</span>
-                    </div>
+          {[0, 1, 2, 3].map((idx) => (
+            <div
+              key={idx}
+              onClick={() => handleSelect(idx)}
+              className={`aspect-[4/3] relative cursor-pointer group ${isInitialShuffle ? `animate-shuffle-${idx}` : 'animate-vertical-float'}`}
+              style={{ animationDelay: !isInitialShuffle ? `${idx * 0.15}s` : '0s' }}
+            >
+              <div className="envelope rounded-sm group-hover:border-purple-500 group-hover:shadow-[0_0_30px_rgba(147,51,234,0.3)] transition-all">
+                <div className="envelope-flap"></div>
+                <div className="envelope-body flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-purple-900/30 border border-purple-500/50 flex items-center justify-center">
+                     <span className="text-[10px] text-purple-300 opacity-50">❂</span>
                   </div>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         {error && (
-          <div className="mt-8 p-6 border border-red-900/30 bg-red-950/10 rounded-2xl max-w-sm text-center animate-in fade-in">
-            <p className="text-sm text-red-400 mb-4">{error}</p>
-            <button 
-              onClick={resetFate}
-              className="text-[10px] uppercase tracking-widest text-white/60 hover:text-white transition-colors border border-white/20 px-4 py-2 rounded-full"
-            >
-              Try Selection Again
+          <div className="mt-8 p-6 border border-purple-900/30 bg-purple-950/5 rounded-2xl max-w-sm text-center animate-in fade-in">
+            <p className="text-sm text-purple-300/80 italic mb-4">{error}</p>
+            <button onClick={resetFate} className="text-[10px] uppercase tracking-widest text-white/60 hover:text-white transition-colors border border-white/20 px-4 py-2 rounded-full">
+              Seek Re-Selection
             </button>
           </div>
         )}
@@ -147,53 +130,25 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
             {showPopup && reading && (
               <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 py-20 bg-black/80 backdrop-blur-sm animate-in fade-in duration-500 overflow-y-auto no-scrollbar">
                 <div className="max-w-xl w-full p-8 sm:p-12 border border-purple-900/50 bg-mystic-gradient rounded-[2.5rem] space-y-10 shadow-2xl animate-in slide-in-from-bottom-12 duration-700 relative">
-                  <button 
-                    onClick={closePopup}
-                    className="absolute top-6 right-8 text-gray-500 hover:text-purple-400 transition-colors text-xl font-light"
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
-
+                  <button onClick={closePopup} className="absolute top-6 right-8 text-gray-500 hover:text-purple-400 transition-colors text-xl font-light">✕</button>
                   <div className="space-y-4 text-center">
                     <span className="text-[10px] uppercase tracking-[0.4em] text-purple-500 font-black">The Directives of Jonathan</span>
                     <h3 className="text-5xl font-mystical text-white tracking-widest">{reading.directive}</h3>
                   </div>
-                  
                   <div className="space-y-8 text-center">
-                    <p className="text-xl sm:text-2xl text-gray-100 leading-relaxed font-light italic">
-                      "{reading.fate}"
-                    </p>
+                    <p className="text-xl sm:text-2xl text-gray-100 leading-relaxed font-light italic">"{reading.fate}"</p>
                     <div className="pt-8 border-t border-purple-900/30 max-w-[200px] mx-auto">
                       <span className="text-[10px] uppercase tracking-[0.3em] text-gray-500 block mb-2">Temporal Anchor</span>
                       <p className="text-purple-300 uppercase tracking-[0.2em] text-sm font-bold">{reading.timeAnchor}</p>
                     </div>
                   </div>
-
                   <div className="bg-purple-900/10 p-6 rounded-3xl border border-purple-500/20">
                     <span className="text-[10px] uppercase tracking-[0.3em] text-purple-400 block mb-3 font-black text-center">Signal from Jonathan</span>
-                    <p className="text-sm text-gray-400 leading-relaxed font-light italic text-center whitespace-pre-line">
-                      {reading.sign}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-center pt-4">
-                    <button 
-                      onClick={resetFate}
-                      className="text-[10px] uppercase tracking-[0.3em] text-gray-200 bg-purple-900/40 hover:bg-purple-800 transition-all py-4 px-12 rounded-full border border-purple-500/30"
-                    >
-                      Draw Another Fate
-                    </button>
+                    <p className="text-sm text-gray-400 leading-relaxed font-light italic text-center whitespace-pre-line">{reading.sign}</p>
                   </div>
                 </div>
               </div>
             )}
-          </div>
-        )}
-        
-        {isInitialShuffle && (
-          <div className="mt-20 text-xs text-purple-400 animate-pulse tracking-[0.4em] uppercase font-bold">
-            Gathering the threads...
           </div>
         )}
       </div>

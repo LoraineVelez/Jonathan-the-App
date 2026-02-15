@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ZODIAC_SIGNS } from '../constants';
 import { generateHoroscope } from '../services/geminiService';
@@ -22,11 +23,7 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
       setData({ ...res, icon: sign.icon });
     } catch (e: any) {
       console.error(e);
-      if (e?.message?.includes('API KEY MISSING')) {
-        setError(e.message);
-      } else {
-        setError("The stars are currently clouded. " + (e.message || "Please try again later."));
-      }
+      setError("The stars are currently clouded. Jonathan is silent.");
     } finally {
       setLoading(false);
     }
@@ -42,14 +39,9 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
             <h2 className="text-4xl font-mystical text-purple-200 mb-2">The Zodiac</h2>
             <p className="text-xs text-gray-500 uppercase tracking-[0.2em]">Select your placement</p>
           </div>
-          
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {ZODIAC_SIGNS.map((sign) => (
-              <button
-                key={sign.name}
-                onClick={() => fetchHoroscope(sign)}
-                className="p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/10 hover:border-purple-900 transition-all flex flex-col items-center text-center group"
-              >
+              <button key={sign.name} onClick={() => fetchHoroscope(sign)} className="p-8 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/10 hover:border-purple-900 transition-all flex flex-col items-center text-center group">
                 <span className="text-4xl mb-3 group-hover:scale-125 transition-transform duration-500">{sign.icon}</span>
                 <span className="text-base text-gray-200 font-medium mb-1 tracking-wide">{sign.name}</span>
                 <span className="text-[10px] text-gray-600 font-light uppercase tracking-widest">{sign.range}</span>
@@ -69,13 +61,8 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
               </div>
             ) : error ? (
               <div className="flex flex-col items-center py-12 text-center">
-                <p className="text-red-400 mb-8">{error}</p>
-                <button 
-                  onClick={() => { setSelectedSign(null); setError(null); }}
-                  className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border border-white/10 px-6 py-3 rounded-full"
-                >
-                  Return to Zodiac
-                </button>
+                <p className="text-purple-300 italic mb-8">{error}</p>
+                <button onClick={() => { setSelectedSign(null); setError(null); }} className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border border-white/10 px-6 py-3 rounded-full">Return to Zodiac</button>
               </div>
             ) : data && (
               <div className="space-y-8">
@@ -86,23 +73,12 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
                   </div>
                   <span className="text-6xl text-purple-900/40 select-none">{data.icon}</span>
                 </div>
-                
                 <div className="space-y-6 pt-8 border-t border-white/5">
-                  <h4 className="text-2xl font-mystical text-purple-300 leading-snug">
-                    {data.headline}
-                  </h4>
-                  <p className="text-gray-300 font-light leading-relaxed text-base">
-                    {data.prediction}
-                  </p>
+                  <h4 className="text-2xl font-mystical text-purple-300 leading-snug">{data.headline}</h4>
+                  <p className="text-gray-300 font-light leading-relaxed text-base">{data.prediction}</p>
                 </div>
-                
                 <div className="pt-8 text-center sm:text-left">
-                  <button 
-                    onClick={() => { setSelectedSign(null); setData(null); }}
-                    className="text-[10px] uppercase tracking-[0.2em] text-gray-600 hover:text-purple-400 transition-colors"
-                  >
-                    Check another sign
-                  </button>
+                  <button onClick={() => { setSelectedSign(null); setData(null); }} className="text-[10px] uppercase tracking-[0.2em] text-gray-600 hover:text-purple-400 transition-colors">Check another sign</button>
                 </div>
               </div>
             )}

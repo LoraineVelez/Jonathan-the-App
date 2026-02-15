@@ -1,29 +1,30 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../types";
 
 /**
  * Lazily initialize the Gemini client.
- * Provides explicit instructions if the key is missing in production.
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
-  if (!apiKey || apiKey === "null" || apiKey === "undefined") {
-    throw new Error("API KEY MISSING: Please add a variable named 'API_KEY' in your Netlify Environment Settings and redeploy.");
+  // If key is missing or invalid, we throw a silent error that views will handle mystically
+  if (!apiKey || apiKey === "null" || apiKey === "undefined" || apiKey === "") {
+    throw new Error("The stars are currently clouded.");
   }
   return new GoogleGenAI({ apiKey });
 };
 
 /**
- * Helper to clean JSON strings from the model, stripping markdown blocks if present.
+ * Helper to clean JSON strings from the model.
  */
 const cleanJsonResponse = (text: string) => {
   return text.replace(/```json\n?|```/g, "").trim();
 };
 
 /**
- * Helper to retry API calls with exponential backoff when hitting rate limits (429).
+ * Helper to retry API calls with exponential backoff.
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delay = 1500): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
@@ -46,12 +47,8 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
           text: `Generate a fate reading for a user.
           Directive: ${directive}
           Time Anchor: ${timeAnchor}
-          Tone: Realistic, grounded, direct, not cruel, not dramatic, psychologically insightful.
+          Tone: Realistic, grounded, direct, psychologically insightful.
           Language: 8th grade English.
-          
-          CRITICAL: For the "sign", follow this exact structure:
-          "Observe This Signal: [common object or situation]. Look for: [where to realistically find it]. Meaning: [grounded interpretation about habits or choices]."
-          
           Output: JSON only.`
         }]
       },
@@ -68,10 +65,7 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
       }
     });
 
-    const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response received.");
-
-    const data = JSON.parse(cleanJsonResponse(text));
+    const data = JSON.parse(cleanJsonResponse(response.text));
     return {
       directive,
       timeAnchor,
@@ -89,8 +83,7 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
       contents: {
         parts: [{
           text: `Analyze the Tarot card "${cardName}" ${isReversed ? '(Reversed)' : '(Upright)'}.
-          Include a "description" (traditional matter-of-fact definition) and "interpretation" (grounded, practical real life meaning in calm modern language).
-          Language: 8th grade English.
+          Include a "description" and "interpretation" in grounded, practical real life meaning.
           Output: JSON only.`
         }]
       },
@@ -107,10 +100,7 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
       }
     });
 
-    const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response received.");
-
-    const data = JSON.parse(cleanJsonResponse(text));
+    const data = JSON.parse(cleanJsonResponse(response.text));
     return {
       name: cardName,
       isReversed,
@@ -127,12 +117,7 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [{
-          text: `Analyze this dream in a structured dictionary format: "${dreamDescription}".
-          1. Identify key symbols and define them psychologically (no mysticism).
-          2. Suggest what this indicates about the dreamer's stress/career/relationships.
-          3. Provide a practical "Jonathan Recommends" action step.
-          Language: 8th grade English.
-          Output: JSON only.`
+          text: `Analyze this dream psychologically: "${dreamDescription}". Output JSON only.`
         }]
       },
       config: {
@@ -159,10 +144,7 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
       }
     });
 
-    const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response received.");
-
-    return JSON.parse(cleanJsonResponse(text));
+    return JSON.parse(cleanJsonResponse(response.text));
   });
 };
 
@@ -174,11 +156,7 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
       model: 'gemini-3-flash-preview',
       contents: {
         parts: [{
-          text: `Write a horoscope for ${sign} for today (${today}).
-          Style: Co-Star style, matter-of-fact, based on current planetary transits.
-          Tone: Dry, analytical, modern.
-          Language: 8th grade English.
-          Output: JSON only.`
+          text: `Write a modern, matter-of-fact horoscope for ${sign} for today. Output JSON.`
         }]
       },
       config: {
@@ -194,10 +172,7 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
       }
     });
 
-    const text = response.text;
-    if (!text) throw new Error("Jonathan is silent. No response received.");
-
-    const data = JSON.parse(cleanJsonResponse(text));
+    const data = JSON.parse(cleanJsonResponse(response.text));
     return {
       name: sign,
       date: today,
