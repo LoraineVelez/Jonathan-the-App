@@ -1,27 +1,21 @@
-import { Handler } from '@netlify/functions';
+
+import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { GoogleGenAI, Type } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-
-const getAI = () => {
-  if (!apiKey || apiKey === "null" || apiKey === "undefined") {
-    throw new Error("API Key missing in function environment.");
-  }
-  return new GoogleGenAI({ apiKey });
-};
-
+// API key logic updated to strictly follow guidelines
 const cleanJsonResponse = (text: string): string => {
   return text.replace(/```json\n?|```/g, "").trim();
 };
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
     const { task, data } = JSON.parse(event.body || '{}');
-    const ai = getAI();
+    // Always use process.env.API_KEY directly for initializing GoogleGenAI
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     let responseText = '';
     
@@ -52,6 +46,7 @@ export const handler: Handler = async (event) => {
             }
           }
         });
+        // Accessing the extracted text using the .text property
         responseText = result.text || '';
         const parsed = JSON.parse(cleanJsonResponse(responseText));
         return {
@@ -83,6 +78,7 @@ export const handler: Handler = async (event) => {
             }
           }
         });
+        // Accessing the extracted text using the .text property
         responseText = result.text || '';
         const parsed = JSON.parse(cleanJsonResponse(responseText));
         return {
@@ -123,6 +119,7 @@ export const handler: Handler = async (event) => {
             }
           }
         });
+        // Accessing the extracted text using the .text property
         responseText = result.text || '';
         return {
           statusCode: 200,
@@ -152,6 +149,7 @@ export const handler: Handler = async (event) => {
             }
           }
         });
+        // Accessing the extracted text using the .text property
         responseText = result.text || '';
         const parsed = JSON.parse(cleanJsonResponse(responseText));
         return {

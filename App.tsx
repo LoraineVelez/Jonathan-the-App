@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View } from './types';
 import Home from './views/Home';
@@ -8,16 +7,23 @@ import Tarot from './views/Tarot';
 import Horoscope from './views/Horoscope';
 import DreamAnalysis from './views/DreamAnalysis';
 import AskJonathan from './views/AskJonathan';
+import MysticalLoader from './components/MysticalLoader';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.Home);
-  const [mounted, setMounted] = useState(false);
+  const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
+    // Initial mystical reveal timer
+    const timer = setTimeout(() => {
+      setIsAppLoading(false);
+    }, 4500);
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!mounted) return null;
+  if (isAppLoading) {
+    return <MysticalLoader />;
+  }
 
   const renderView = () => {
     switch (currentView) {
@@ -41,7 +47,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-gray-200 selection:bg-purple-900/30 overflow-x-hidden">
+    <div className="min-h-screen bg-black text-gray-200 selection:bg-purple-900/30 overflow-x-hidden animate-fade-reveal">
       <div className="w-full max-w-6xl mx-auto min-h-screen flex flex-col relative px-4 sm:px-8">
         {renderView()}
       </div>
