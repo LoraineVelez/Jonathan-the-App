@@ -3,28 +3,31 @@ import { FateReading, TarotCard, DreamAnalysisResult, HoroscopeData } from "../t
 
 /**
  * Lazily initialize the Gemini client.
+ * In a Vite/Netlify build, process.env.API_KEY is replaced during the build step.
  */
 const getAI = () => {
   const apiKey = process.env.API_KEY;
   
+  // Strict check for valid key strings
   if (!apiKey || apiKey === "null" || apiKey === "undefined" || apiKey === "") {
-    throw new Error("The stars are currently clouded.");
+    console.error("Gemini API Key is missing or invalid in the environment.");
+    throw new Error("The stars are currently clouded. Jonathan's connection to the beyond has faded.");
   }
   
   return new GoogleGenAI({ apiKey: apiKey as string });
 };
 
 /**
- * Helper to clean JSON strings from the model.
+ * Helper to clean JSON strings from the model response.
  */
 const cleanJsonResponse = (text: string): string => {
   return text.replace(/```json\n?|```/g, "").trim();
 };
 
 /**
- * Helper to retry API calls with exponential backoff.
+ * Helper to retry API calls with exponential backoff for 429 errors.
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 2, delay = 1500): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delay = 2000): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
@@ -67,7 +70,7 @@ export const generateFateReading = async (directive: string, timeAnchor: string)
 
     const text = response.text;
     if (!text) {
-      throw new Error("Jonathan is deep in thought.");
+      throw new Error("Jonathan is deep in thought. The vision remains hazy.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
@@ -107,7 +110,7 @@ export const generateTarotInterpretation = async (cardName: string, isReversed: 
 
     const text = response.text;
     if (!text) {
-      throw new Error("The stars are silent.");
+      throw new Error("The cards are silent tonight.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
@@ -156,7 +159,7 @@ export const analyzeDream = async (dreamDescription: string): Promise<DreamAnaly
 
     const text = response.text;
     if (!text) {
-      throw new Error("The subconscious veil is too thick.");
+      throw new Error("The subconscious veil is too thick to penetrate.");
     }
 
     return JSON.parse(cleanJsonResponse(text));
@@ -189,7 +192,7 @@ export const generateHoroscope = async (sign: string): Promise<HoroscopeData> =>
 
     const text = response.text;
     if (!text) {
-      throw new Error("The transit charts are obscured.");
+      throw new Error("The transit charts are obscured by cosmic fog.");
     }
 
     const data = JSON.parse(cleanJsonResponse(text));
