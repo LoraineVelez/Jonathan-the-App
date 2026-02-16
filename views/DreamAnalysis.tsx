@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { analyzeDream } from '../services/geminiService';
 import { DreamAnalysisResult } from '../types';
+import ShareButton from '../components/ShareButton';
 
 interface DreamAnalysisProps {
   onBack: () => void;
@@ -31,8 +31,8 @@ const DreamAnalysis: React.FC<DreamAnalysisProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-4 sm:p-8 bg-black overflow-y-auto">
-      <button onClick={onBack} className="self-start text-xs text-purple-400 mb-8 uppercase tracking-widest">← Back</button>
+    <div className="flex-1 flex flex-col p-4 sm:p-8 bg-black overflow-y-auto no-scrollbar">
+      <button onClick={onBack} className="self-start text-xs text-purple-400 mb-8 uppercase tracking-widest hover:text-purple-300 transition-colors">← Back</button>
       
       {!result ? (
         <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full">
@@ -65,37 +65,44 @@ const DreamAnalysis: React.FC<DreamAnalysisProps> = ({ onBack }) => {
           </form>
         </div>
       ) : (
-        <div className="flex-1 pb-16 space-y-12 animate-in fade-in duration-1000 max-w-4xl mx-auto w-full">
-          <div className="text-center">
-            <h3 className="text-4xl font-mystical text-white mb-2">Interpretation</h3>
-            <p className="text-[10px] text-gray-500 uppercase tracking-[0.4em] font-bold">Psychological Dictionary Mode</p>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-8">
-              <section className="space-y-6">
-                <h4 className="text-[10px] uppercase tracking-[0.3em] text-purple-500 font-black border-b border-purple-900/20 pb-2">Symbol Inventory</h4>
-                <div className="space-y-6">
-                  {result.symbols.map((sym, idx) => (
-                    <div key={idx} className="space-y-2 group">
-                      <p className="text-lg font-mystical text-white group-hover:text-purple-300 transition-colors">{sym.name}</p>
-                      <p className="text-sm text-gray-400 font-light leading-relaxed italic">{sym.meaning}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+        <div className="flex-1 pb-16 flex flex-col items-center space-y-12 animate-in fade-in duration-1000 max-w-4xl mx-auto w-full">
+          <div id="dream-result" className="w-full space-y-10 p-4">
+            <div className="text-center">
+              <h3 className="text-4xl font-mystical text-white mb-2">Interpretation</h3>
+              <p className="text-[10px] text-gray-500 uppercase tracking-[0.4em] font-bold">Psychological Dictionary Mode</p>
             </div>
-            <div className="space-y-8">
-              <section className="space-y-4">
-                <h4 className="text-[10px] uppercase tracking-[0.3em] text-purple-500 font-black border-b border-purple-900/20 pb-2">Subconscious Signal</h4>
-                <p className="text-base text-gray-300 leading-relaxed font-light">{result.suggestion}</p>
-              </section>
-              <section className="p-8 bg-purple-900/10 border border-purple-900/20 rounded-[2rem] space-y-4 shadow-xl shadow-purple-950/10">
-                <h4 className="text-[10px] uppercase tracking-[0.4em] text-purple-300 font-black">Jonathan Recommends</h4>
-                <p className="text-lg text-white font-light italic leading-relaxed">{result.recommendation}</p>
-              </section>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8">
+                <section className="space-y-6">
+                  <h4 className="text-[10px] uppercase tracking-[0.3em] text-purple-500 font-black border-b border-purple-900/20 pb-2">Symbol Inventory</h4>
+                  <div className="space-y-6">
+                    {result.symbols.map((sym, idx) => (
+                      <div key={idx} className="space-y-2 group">
+                        <p className="text-lg font-mystical text-white group-hover:text-purple-300 transition-colors">{sym.name}</p>
+                        <p className="text-sm text-gray-400 font-light leading-relaxed italic">{sym.meaning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+              <div className="space-y-8">
+                <section className="space-y-4">
+                  <h4 className="text-[10px] uppercase tracking-[0.3em] text-purple-500 font-black border-b border-purple-900/20 pb-2">Subconscious Signal</h4>
+                  <p className="text-base text-gray-300 leading-relaxed font-light">{result.suggestion}</p>
+                </section>
+                <section className="p-8 bg-purple-900/10 border border-purple-900/20 rounded-[2rem] space-y-4 shadow-xl shadow-purple-950/10">
+                  <h4 className="text-[10px] uppercase tracking-[0.4em] text-purple-300 font-black">Jonathan Recommends</h4>
+                  <p className="text-lg text-white font-light italic leading-relaxed">{result.recommendation}</p>
+                </section>
+              </div>
             </div>
           </div>
-          <div className="text-center pt-8">
+          <div className="flex flex-col items-center gap-6 pt-8">
+            <ShareButton 
+              elementId="dream-result" 
+              title="My Dream Deciphered" 
+              text="Jonathan has decoded my subconscious visions. Explore your own mind." 
+            />
             <button onClick={() => { setResult(null); setDream(''); setError(null); }} className="text-[10px] uppercase tracking-[0.3em] text-gray-600 hover:text-purple-400 border border-transparent hover:border-purple-900/30 px-8 py-4 rounded-full transition-all">Analyze another dream</button>
           </div>
         </div>

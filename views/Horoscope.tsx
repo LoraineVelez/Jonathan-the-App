@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ZODIAC_SIGNS } from '../constants';
 import { generateHoroscope } from '../services/geminiService';
 import { HoroscopeData } from '../types';
+import ShareButton from '../components/ShareButton';
 
 interface HoroscopeProps {
   onBack: () => void;
@@ -29,7 +30,7 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col p-6 sm:p-12 overflow-y-auto">
+    <div className="flex-1 flex flex-col p-6 sm:p-12 overflow-y-auto no-scrollbar">
       <div className="max-w-5xl mx-auto w-full">
         <button onClick={onBack} className="self-start text-xs text-purple-400 mb-8 uppercase tracking-widest hover:text-purple-300 transition-colors">← Back</button>
         
@@ -52,34 +53,44 @@ const Horoscope: React.FC<HoroscopeProps> = ({ onBack }) => {
         )}
 
         {(loading || data || error) && selectedSign && (
-          <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom duration-1000 max-w-2xl mx-auto w-full pt-4">
-            <div className="w-full bg-white/5 border border-purple-900/30 p-10 rounded-[3rem] relative shadow-2xl shadow-purple-950/20 backdrop-blur-sm">
-              {loading ? (
-                <div className="flex flex-col items-center py-24">
-                  <div className="text-5xl animate-spin-slow mb-10 opacity-40">✦</div>
-                  <p className="text-xs text-purple-400 animate-pulse tracking-[0.3em] uppercase">Consulting the transit charts...</p>
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center py-12 text-center">
-                  <p className="text-purple-300 italic mb-8">{error}</p>
-                  <button onClick={() => { setSelectedSign(null); setError(null); }} className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border border-white/10 px-6 py-3 rounded-full">Return to Zodiac</button>
-                </div>
-              ) : data && (
-                <div className="space-y-8">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-5xl font-mystical text-white">{data.name}</h3>
-                      <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-2 font-medium">Today • {data.date}</p>
+          <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom duration-1000 max-w-2xl mx-auto w-full pt-4 pb-20">
+            <div className="w-full flex flex-col items-center gap-8">
+              <div id="horoscope-result" className="w-full bg-white/5 border border-purple-900/30 p-10 rounded-[3rem] relative shadow-2xl shadow-purple-950/20 backdrop-blur-sm">
+                {loading ? (
+                  <div className="flex flex-col items-center py-24">
+                    <div className="text-5xl animate-spin-slow mb-10 opacity-40">✦</div>
+                    <p className="text-xs text-purple-400 animate-pulse tracking-[0.3em] uppercase">Consulting the transit charts...</p>
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center py-12 text-center">
+                    <p className="text-purple-300 italic mb-8">{error}</p>
+                    <button onClick={() => { setSelectedSign(null); setError(null); }} className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border border-white/10 px-6 py-3 rounded-full">Return to Zodiac</button>
+                  </div>
+                ) : data && (
+                  <div className="space-y-8">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-5xl font-mystical text-white">{data.name}</h3>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-2 font-medium">Today • {data.date}</p>
+                      </div>
+                      <span className="text-6xl text-purple-900/40 select-none">{data.icon}</span>
                     </div>
-                    <span className="text-6xl text-purple-900/40 select-none">{data.icon}</span>
+                    <div className="space-y-6 pt-8 border-t border-white/5">
+                      <h4 className="text-2xl font-mystical text-purple-300 leading-snug">{data.headline}</h4>
+                      <p className="text-gray-300 font-light leading-relaxed text-base">{data.prediction}</p>
+                    </div>
                   </div>
-                  <div className="space-y-6 pt-8 border-t border-white/5">
-                    <h4 className="text-2xl font-mystical text-purple-300 leading-snug">{data.headline}</h4>
-                    <p className="text-gray-300 font-light leading-relaxed text-base">{data.prediction}</p>
-                  </div>
-                  <div className="pt-8 text-center sm:text-left">
-                    <button onClick={() => { setSelectedSign(null); setData(null); }} className="text-[10px] uppercase tracking-[0.2em] text-gray-600 hover:text-purple-400 transition-colors">Check another sign</button>
-                  </div>
+                )}
+              </div>
+              
+              {data && !loading && (
+                <div className="flex flex-col items-center gap-6">
+                  <ShareButton 
+                    elementId="horoscope-result" 
+                    title={`${data.name} Horoscope`} 
+                    text={`Behold the celestial alignment for ${data.name}.`} 
+                  />
+                  <button onClick={() => { setSelectedSign(null); setData(null); }} className="text-[10px] uppercase tracking-[0.2em] text-gray-600 hover:text-purple-400 transition-colors">Check another sign</button>
                 </div>
               )}
             </div>

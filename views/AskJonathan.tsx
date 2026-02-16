@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { EIGHT_BALL_ANSWERS } from '../constants';
 
@@ -17,17 +16,17 @@ const AskJonathan: React.FC<AskJonathanProps> = ({ onBack }) => {
     setLoading(true);
     setAnswer('');
     
-    // Simulate mystical loading
+    // Simulate mystical loading - reduced from 3000ms to 1200ms
     setTimeout(() => {
       const randomAnswer = EIGHT_BALL_ANSWERS[Math.floor(Math.random() * EIGHT_BALL_ANSWERS.length)];
       setAnswer(randomAnswer);
       setLoading(false);
-    }, 3000);
+    }, 1200);
   };
 
   return (
     <div className="flex-1 flex flex-col p-8 bg-black">
-      <button onClick={onBack} className="self-start text-xs text-purple-400 mb-8 uppercase tracking-widest">Back</button>
+      <button onClick={onBack} className="self-start text-xs text-purple-400 mb-8 uppercase tracking-widest hover:text-purple-300 transition-colors">← Back</button>
       
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <h2 className="text-3xl font-mystical text-purple-200 mb-2">Ask Jonathan</h2>

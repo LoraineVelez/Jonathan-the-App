@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { DIRECTIVES, TIME_ANCHORS } from '../constants';
 import { generateFateReading } from '../services/geminiService';
 import { FateReading } from '../types';
+import ShareButton from '../components/ShareButton';
 
 interface FateProps {
   onBack: () => void;
@@ -18,9 +18,10 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
+    // Reduced from 2400ms to 1000ms for faster interaction
     const shuffleTimer = setTimeout(() => {
       setIsInitialShuffle(false);
-    }, 2400);
+    }, 1000);
 
     return () => clearTimeout(shuffleTimer);
   }, []);
@@ -39,13 +40,14 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
       const res = await generateFateReading(randomDirective, randomTime);
       setReading(res);
       
+      // Accelerated mystical transitions
       setTimeout(() => {
         setIsOpen(true);
         setTimeout(() => {
           setShowPopup(true);
           setLoading(false);
-        }, 800);
-      }, 500);
+        }, 400); // Reduced from 800ms
+      }, 200); // Reduced from 500ms
       
     } catch (e: any) {
       console.error(e);
@@ -61,7 +63,7 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
     setIsOpen(false);
     setShowPopup(false);
     setIsInitialShuffle(true);
-    setTimeout(() => setIsInitialShuffle(false), 2400);
+    setTimeout(() => setIsInitialShuffle(false), 1000);
   };
 
   const closePopup = () => {
@@ -129,23 +131,30 @@ const Fate: React.FC<FateProps> = ({ onBack }) => {
 
             {showPopup && reading && (
               <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 py-20 bg-black/80 backdrop-blur-sm animate-in fade-in duration-500 overflow-y-auto no-scrollbar">
-                <div className="max-w-xl w-full p-8 sm:p-12 border border-purple-900/50 bg-mystic-gradient rounded-[2.5rem] space-y-10 shadow-2xl animate-in slide-in-from-bottom-12 duration-700 relative">
-                  <button onClick={closePopup} className="absolute top-6 right-8 text-gray-500 hover:text-purple-400 transition-colors text-xl font-light">✕</button>
-                  <div className="space-y-4 text-center">
-                    <span className="text-[10px] uppercase tracking-[0.4em] text-purple-500 font-black">The Directives of Jonathan</span>
-                    <h3 className="text-5xl font-mystical text-white tracking-widest">{reading.directive}</h3>
-                  </div>
-                  <div className="space-y-8 text-center">
-                    <p className="text-xl sm:text-2xl text-gray-100 leading-relaxed font-light italic">"{reading.fate}"</p>
-                    <div className="pt-8 border-t border-purple-900/30 max-w-[200px] mx-auto">
-                      <span className="text-[10px] uppercase tracking-[0.3em] text-gray-500 block mb-2">Temporal Anchor</span>
-                      <p className="text-purple-300 uppercase tracking-[0.2em] text-sm font-bold">{reading.timeAnchor}</p>
+                <div className="max-w-xl w-full flex flex-col items-center gap-6">
+                  <div id="fate-result" className="w-full p-8 sm:p-12 border border-purple-900/50 bg-mystic-gradient rounded-[2.5rem] space-y-10 shadow-2xl animate-in slide-in-from-bottom-12 duration-700 relative">
+                    <button onClick={closePopup} className="absolute top-6 right-8 text-gray-500 hover:text-purple-400 transition-colors text-xl font-light">✕</button>
+                    <div className="space-y-4 text-center">
+                      <span className="text-[10px] uppercase tracking-[0.4em] text-purple-500 font-black">The Directives of Jonathan</span>
+                      <h3 className="text-5xl font-mystical text-white tracking-widest">{reading.directive}</h3>
+                    </div>
+                    <div className="space-y-8 text-center">
+                      <p className="text-xl sm:text-2xl text-gray-100 leading-relaxed font-light italic">"{reading.fate}"</p>
+                      <div className="pt-8 border-t border-purple-900/30 max-w-[200px] mx-auto">
+                        <span className="text-[10px] uppercase tracking-[0.3em] text-gray-500 block mb-2">Temporal Anchor</span>
+                        <p className="text-purple-300 uppercase tracking-[0.2em] text-sm font-bold">{reading.timeAnchor}</p>
+                      </div>
+                    </div>
+                    <div className="bg-purple-900/10 p-6 rounded-3xl border border-purple-500/20">
+                      <span className="text-[10px] uppercase tracking-[0.3em] text-purple-400 block mb-3 font-black text-center">Signal from Jonathan</span>
+                      <p className="text-sm text-gray-400 leading-relaxed font-light italic text-center whitespace-pre-line">{reading.sign}</p>
                     </div>
                   </div>
-                  <div className="bg-purple-900/10 p-6 rounded-3xl border border-purple-500/20">
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-purple-400 block mb-3 font-black text-center">Signal from Jonathan</span>
-                    <p className="text-sm text-gray-400 leading-relaxed font-light italic text-center whitespace-pre-line">{reading.sign}</p>
-                  </div>
+                  <ShareButton 
+                    elementId="fate-result" 
+                    title="My Fate Unsealed" 
+                    text={`Jonathan has unsealed my destiny: ${reading.directive}. See what yours holds.`} 
+                  />
                 </div>
               </div>
             )}
