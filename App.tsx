@@ -14,7 +14,6 @@ const App: React.FC = () => {
   const [isAppLoading, setIsAppLoading] = useState(true);
 
   useEffect(() => {
-    // Initial mystical reveal timer
     const timer = setTimeout(() => {
       setIsAppLoading(false);
     }, 4500);
@@ -47,8 +46,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-gray-200 selection:bg-purple-900/30 overflow-x-hidden animate-fade-reveal">
-      <div className="w-full max-w-6xl mx-auto min-h-screen flex flex-col relative px-4 sm:px-8">
+    <div className="min-h-[100dvh] bg-mystic-gradient text-gray-200 selection:bg-purple-900/30 overflow-x-hidden animate-fade-reveal flex flex-col">
+      <div className="w-full flex-1 flex flex-col relative">
         {renderView()}
       </div>
     </div>

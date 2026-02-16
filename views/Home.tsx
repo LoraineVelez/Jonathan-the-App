@@ -7,9 +7,9 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ onBegin }) => {
   return (
     <div 
-      className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-mystic-gradient"
+      className="flex-1 flex flex-col items-center justify-center p-8 text-center"
     >
-      <div className="animate-fade-reveal space-y-4">
+      <div className="animate-fade-reveal space-y-4 max-w-2xl mx-auto">
         <h1 className="text-6xl sm:text-7xl font-mystical tracking-widest uppercase mb-4 glow-purple">
           Jonathan
         </h1>
